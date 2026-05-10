@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trading Strategy Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --surface2: #0f1923;
+    --border: #1a2230;
+    --blue: #4e9fff;
+    --amber: #f5a623;
+    --green: #00ff9d;
+    --text: #e2e8f0;
+    --muted: #4a5568;
+    --dim: #2d3748;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,157,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,157,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* HEADER */
+  .header { margin-bottom: 40px; animation: fadeDown 0.6s ease both; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .brand { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--green); letter-spacing: 0.18em; }
+  .session-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+  h1 { font-size: clamp(36px, 8vw, 54px); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1; }
+  h1 span { color: var(--green); }
+  .subtitle { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-top: 10px; }
+
+  /* PROGRESS */
+  .progress-wrap { margin: 28px 0 36px; animation: fadeDown 0.6s 0.1s ease both; }
+  .progress-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .progress-count { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--green); letter-spacing: 0.1em; }
+  .progress-pct { font-size: 28px; font-weight: 800; color: var(--green); }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); width: 0%; box-shadow: 0 0 10px rgba(0,255,157,0.4); }
+  .phase-dots { display: flex; gap: 4px; margin-top: 10px; }
+  .phase-dot { flex: 1; height: 2px; border-radius: 1px; background: var(--border); transition: background 0.4s; }
+  .phase-dot.p1 { background: var(--blue); }
+  .phase-dot.p2 { background: var(--amber); }
+  .phase-dot.p3 { background: var(--green); }
+
+  /* RESET */
+  .reset-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 6px 16px; border-radius: 2px; cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    float: right; margin-top: -2px;
+  }
+  .reset-btn:hover { border-color: var(--dim); color: var(--text); }
+
+  /* PHASE */
+  .phase { margin-bottom: 8px; }
+  .phase-header {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 20px 0 10px;
+    animation: fadeDown 0.5s ease both;
+  }
+  .phase-header::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.15; }
+  .p1 .phase-header { color: var(--blue); }
+  .p2 .phase-header { color: var(--amber); }
+  .p3 .phase-header { color: var(--green); }
+
+  /* STEP */
+  .step {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: 3px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, opacity 0.3s, transform 0.15s;
+    animation: slideIn 0.4s ease both;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .step:hover { transform: translateX(3px); }
+  .step:active { transform: translateX(3px) scale(0.99); }
+
+  .p1 .step { border-left-color: var(--blue); }
+  .p2 .step { border-left-color: var(--amber); }
+  .p3 .step { border-left-color: var(--green); }
+
+  .step.done { opacity: 0.4; }
+  .step.done .step-text { text-decoration: line-through; text-decoration-color: var(--muted); }
+
+  /* ripple */
+  .step .ripple {
+    position: absolute; border-radius: 50%;
+    transform: scale(0); animation: ripple 0.5s linear;
+    background: rgba(255,255,255,0.05); pointer-events: none;
+  }
+  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Share Tech Mono', monospace; font-size: 11px;
+    flex-shrink: 0; margin-top: 1px;
+    transition: background 0.3s, color 0.3s;
+  }
+  .p1 .step-num { background: rgba(78,159,255,0.12); color: var(--blue); border: 1px solid rgba(78,159,255,0.3); }
+  .p2 .step-num { background: rgba(245,166,35,0.12); color: var(--amber); border: 1px solid rgba(245,166,35,0.3); }
+  .p3 .step-num { background: rgba(0,255,157,0.12); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+  .step.done .step-num { background: rgba(0,255,157,0.15) !important; color: var(--green) !important; border-color: rgba(0,255,157,0.4) !important; }
+
+  .step-body { flex: 1; }
+  .step-cat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .p1 .step-cat { color: rgba(78,159,255,0.55); }
+  .p2 .step-cat { color: rgba(245,166,35,0.55); }
+  .p3 .step-cat { color: rgba(0,255,157,0.55); }
+
+  .step-text { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.25; color: var(--text); }
+  .step-sub { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.55; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.02em; font-weight: 400; }
+
+  .risk-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .pill {
+    font-family: 'Share Tech Mono', monospace; font-size: 10px;
+    padding: 3px 10px; border-radius: 2px; letter-spacing: 0.08em;
+  }
+  .pill-green { background: rgba(0,255,157,0.1); color: var(--green); border: 1px solid rgba(0,255,157,0.25); }
+  .pill-amber { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+
+  /* COMPLETE BANNER */
+  .complete-banner {
+    display: none;
+    margin-top: 32px;
+    padding: 22px 24px;
+    background: rgba(0,255,157,0.06);
+    border: 1px solid rgba(0,255,157,0.25);
+    border-radius: 3px;
+    text-align: center;
+    animation: fadeDown 0.5s ease both;
+  }
+  .complete-banner.show { display: block; }
+  .complete-banner .big { font-size: 32px; font-weight: 800; color: var(--green); text-transform: uppercase; letter-spacing: 0.06em; }
+  .complete-banner .small { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: 0.1em; }
+
+  /* FOOTER */
+  .footer { margin-top: 48px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .footer-text { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 0.1em; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+
+  /* stagger steps */
+  .step:nth-child(1) { animation-delay: 0.05s; }
+  .step:nth-child(2) { animation-delay: 0.10s; }
+  .step:nth-child(3) { animation-delay: 0.15s; }
+  .step:nth-child(4) { animation-delay: 0.20s; }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .page { padding: 28px 14px 60px; }
+    h1 { font-size: 36px; }
+    .step { padding: 14px 14px; }
+    .step-text { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-top">
+      <span class="brand">// TRADE SYSTEM v2</span>
+      <span class="session-tag" id="session-date"></span>
+    </div>
+    <h1>Strategy <span>Checklist</span></h1>
+    <p class="subtitle">// Execute every step — no signal = no trade</p>
+  </header>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-row">
+      <span class="progress-count" id="prog-count">0 / 9 STEPS</span>
+      <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+      <span class="progress-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="phase-dots" id="phase-dots"></div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase p1">
+    <div class="phase-header" style="animation-delay:0.15s">Phase 01 — Bias &amp; Direction</div>
+
+    <div class="step" onclick="toggle(this,0)">
+      <div class="step-num" id="n0">01</div>
+      <div class="step-body">
+        <div class="step-cat">Daily Bias</div>
+        <div class="step-text">Identify the Daily Bias</div>
+        <div class="step-sub">Determine the overall market direction for the day.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,1)">
+      <div class="step-num" id="n1">02</div>
+      <div class="step-body">
+        <div class="step-cat">4H Bias</div>
+        <div class="step-text">Confirm 4H Bias &amp; Direction</div>
+        <div class="step-sub">Align the 4H timeframe with the daily direction before proceeding.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,2)">
+      <div class="step-num" id="n2">03</div>
+      <div class="step-body">
+        <div class="step-cat">Trend Alignment</div>
+        <div class="step-text">Is the trade aligned with the overall direction?</div>
+        <div class="risk-row">
+          <span class="pill pill-green">✓ With trend = normal size</span>
+          <span class="pill pill-amber">⚠ Against = minimize risk</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase p2">
+    <div class="phase-header" style="animation-delay:0.25s">Phase 02 — Entry Confirmation</div>
+
+    <div class="step" onclick="toggle(this,3)">
+      <div class="step-num" id="n3">04</div>
+      <div class="step-body">
+        <div class="step-cat">Liquidity</div>
+        <div class="step-text">Identify Opposite Liquidity After a Push</div>
+        <div class="step-sub">After price raids the expected level, look for liquidity on the other side.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,4)">
+      <div class="step-num" id="n4">05</div>
+      <div class="step-body">
+        <div class="step-cat">Liquidity Sweep</div>
+        <div class="step-text">Confirm a Liquidity Sweep Has Occurred</div>
+        <div class="step-sub">Price must sweep a key high/low — stop hunts, equal highs/lows — before entry.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,5)">
+      <div class="step-num" id="n5">06</div>
+      <div class="step-body">
+        <div class="step-cat">Fibonacci</div>
+        <div class="step-text">Fibo Level Aligned with the Liquidity Sweep Zone</div>
+        <div class="step-sub">Fibo retracement must overlap the swept level — stronger confluence, better entry.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,6)">
+      <div class="step-num" id="n6">07</div>
+      <div class="step-body">
+        <div class="step-cat">Key Levels</div>
+        <div class="step-text">Validate Zone with Key Structural Levels</div>
+        <div class="step-sub">Order blocks, S/R, or supply/demand zones must confirm the area.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase p3">
+    <div class="phase-header" style="animation-delay:0.35s">Phase 03 — Precision Entry</div>
+
+    <div class="step" onclick="toggle(this,7)">
+      <div class="step-num" id="n7">08</div>
+      <div class="step-body">
+        <div class="step-cat">Timeframe</div>
+        <div class="step-text">Drop to Lower Timeframe — 15min → 5min</div>
+        <div class="step-sub">Zoom in to time the entry once all higher-TF conditions are met.</div>
+      </div>
+    </div>
+
+    <div class="step" onclick="toggle(this,8)">
+      <div class="step-num" id="n8">09</div>
+      <div class="step-body">
+        <div class="step-cat">Execution</div>
+        <div class="step-text">ChoCh Confirmed → Enter at 1:2 RR + Proper SL Room</div>
+        <div class="step-sub">Wait for Change of Character, then execute only at min. 1:2 RR with SL space.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETE -->
+  <div class="complete-banner" id="complete-banner">
+    <div class="big">✓ All Clear — Execute</div>
+    <div class="small">// All 9 conditions confirmed. Proceed with discipline.</div>
+  </div>
+
+  <footer class="footer">
+    <span class="footer-text">// No exceptions to the rules</span>
+    <span class="footer-text">TRADE SYSTEM v2.0</span>
+  </footer>
+
+</div>
+
+<script>
+  const TOTAL = 9;
+  const state = JSON.parse(localStorage.getItem('checklist') || 'null') || Array(TOTAL).fill(false);
+  const checks = ['01','02','03','04','05','06','07','08','09'];
+
+  // Set today's date
+  const d = new Date();
+  document.getElementById('session-date').textContent =
+    d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+
+  // Build phase dots
+  const dotsEl = document.getElementById('phase-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'phase-dot';
+    dot.id = 'dot' + i;
+    dotsEl.appendChild(dot);
+  }
+
+  function save() { localStorage.setItem('checklist', JSON.stringify(state)); }
+
+  function updateUI() {
+    const done = state.filter(Boolean).length;
+    const pct = Math.round(done / TOTAL * 100);
+    document.getElementById('prog-count').textContent = done + ' / ' + TOTAL + ' STEPS';
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-fill').style.width = pct + '%';
+
+    // dots
+    for (let i = 0; i < TOTAL; i++) {
+      const dot = document.getElementById('dot' + i);
+      dot.className = 'phase-dot';
+      if (state[i]) {
+        if (i < 3) dot.classList.add('p1');
+        else if (i < 7) dot.classList.add('p2');
+        else dot.classList.add('p3');
+      }
+    }
+
+    document.getElementById('complete-banner').className =
+      'complete-banner' + (done === TOTAL ? ' show' : '');
+    save();
+  }
+
+  function toggle(el, i) {
+    // ripple
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    r.style.cssText = 'width:200px;height:200px;left:50%;top:50%;margin:-100px 0 0 -100px;';
+    el.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+
+    state[i] = !state[i];
+    const num = document.getElementById('n' + i);
+
+    if (state[i]) {
+      el.classList.add('done');
+      num.textContent = '✓';
+    } else {
+      el.classList.remove('done');
+      num.textContent = checks[i];
+    }
+    updateUI();
+  }
+
+  function resetAll() {
+    for (let i = 0; i < TOTAL; i++) {
+      state[i] = false;
+      document.getElementById('n' + i).textContent = checks[i];
+      document.querySelectorAll('.step')[i].classList.remove('done');
+    }
+    updateUI();
+  }
+
+  // Init from saved state
+  (function init() {
+    document.querySelectorAll('.step').forEach((el, i) => {
+      if (state[i]) {
+        el.classList.add('done');
+        document.getElementById('n' + i).textContent = '✓';
+      }
+    });
+    updateUI();
+  })();
+</script>
+</body>
+</html>
