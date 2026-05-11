@@ -55,7 +55,7 @@
   h1 span { color: var(--green); }
   .subtitle { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-top: 10px; }
 
-  /* PROGRESS */
+  /* PROGRESS — inline */
   .progress-wrap { margin: 28px 0 36px; animation: fadeDown 0.6s 0.1s ease both; }
   .progress-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
   .progress-count { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--green); letter-spacing: 0.1em; }
@@ -67,6 +67,60 @@
   .phase-dot.p1 { background: var(--blue); }
   .phase-dot.p2 { background: var(--amber); }
   .phase-dot.p3 { background: var(--green); }
+
+  /* STICKY PROGRESS BAR */
+  .sticky-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(8,11,16,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sticky-bar.visible { transform: translateY(0); }
+  .sticky-bar-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--green); white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .sticky-bar-track {
+    flex: 1; height: 3px;
+    background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .sticky-bar-fill {
+    height: 100%; background: var(--green);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+    box-shadow: 0 0 8px rgba(0,255,157,0.5);
+  }
+  .sticky-bar-pct {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    color: var(--green); white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .sticky-dots {
+    display: flex; gap: 3px;
+  }
+  .sticky-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--border);
+    transition: background 0.4s;
+    flex-shrink: 0;
+  }
+  .sticky-dot.p1 { background: var(--blue); }
+  .sticky-dot.p2 { background: var(--amber); }
+  .sticky-dot.p3 { background: var(--green); }
 
   /* RESET */
   .reset-btn {
@@ -199,6 +253,14 @@
 </style>
 </head>
 <body>
+<!-- STICKY PROGRESS BAR -->
+<div class="sticky-bar" id="sticky-bar">
+  <span class="sticky-bar-label" id="sticky-count">0 / 9</span>
+  <div class="sticky-bar-track"><div class="sticky-bar-fill" id="sticky-fill"></div></div>
+  <div class="sticky-dots" id="sticky-dots"></div>
+  <span class="sticky-bar-pct" id="sticky-pct">0%</span>
+</div>
+
 <div class="page">
 
   <header class="header">
@@ -357,19 +419,24 @@
   function updateUI() {
     const done = state.filter(Boolean).length;
     const pct = Math.round(done / TOTAL * 100);
+
+    // inline progress
     document.getElementById('prog-count').textContent = done + ' / ' + TOTAL + ' STEPS';
     document.getElementById('prog-pct').textContent = pct + '%';
     document.getElementById('prog-fill').style.width = pct + '%';
 
-    // dots
+    // sticky bar
+    document.getElementById('sticky-count').textContent = done + ' / ' + TOTAL;
+    document.getElementById('sticky-pct').textContent = pct + '%';
+    document.getElementById('sticky-fill').style.width = pct + '%';
+
+    // dots (inline + sticky)
     for (let i = 0; i < TOTAL; i++) {
       const dot = document.getElementById('dot' + i);
-      dot.className = 'phase-dot';
-      if (state[i]) {
-        if (i < 3) dot.classList.add('p1');
-        else if (i < 7) dot.classList.add('p2');
-        else dot.classList.add('p3');
-      }
+      const sdot = document.getElementById('sdot' + i);
+      const cls = state[i] ? (i < 3 ? 'p1' : i < 7 ? 'p2' : 'p3') : '';
+      dot.className = 'phase-dot' + (cls ? ' ' + cls : '');
+      sdot.className = 'sticky-dot' + (cls ? ' ' + cls : '');
     }
 
     document.getElementById('complete-banner').className =
@@ -406,6 +473,27 @@
     }
     updateUI();
   }
+
+  // Build sticky dots
+  const stickyDotsEl = document.getElementById('sticky-dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'sticky-dot';
+    dot.id = 'sdot' + i;
+    stickyDotsEl.appendChild(dot);
+  }
+
+  // Sticky bar scroll behavior
+  const stickyBar = document.getElementById('sticky-bar');
+  const progressWrap = document.querySelector('.progress-wrap');
+  window.addEventListener('scroll', () => {
+    const bottom = progressWrap.getBoundingClientRect().bottom;
+    if (bottom < 0) {
+      stickyBar.classList.add('visible');
+    } else {
+      stickyBar.classList.remove('visible');
+    }
+  }, { passive: true });
 
   // Init from saved state
   (function init() {
